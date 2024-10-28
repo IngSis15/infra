@@ -1,0 +1,80 @@
+services:
+  permission-manager-db:
+    image: postgres
+    environment:
+      POSTGRES_DB: ${PM_DB_NAME}
+      POSTGRES_USER: ${PM_DB_USER}
+      POSTGRES_PASSWORD: ${PM_DB_PASSWORD}
+    volumes:
+      - permission_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  snippet-manager-db:
+    image: postgres
+    environment:
+      POSTGRES_DB: ${SM_DB_NAME}
+      POSTGRES_USER: ${SM_DB_USER}
+      POSTGRES_PASSWORD: ${SM_DB_PASSWORD}
+    volumes:
+      - snippet_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  permission-manager:
+    image: ghcr.io/ingsis15/permission-manager:dev
+    ports:
+      - "${PM_PORT}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: ${PM_SPRING_URL}
+      SPRING_DATASOURCE_USERNAME: ${PM_SPRING_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PM_SPRING_PASSWORD}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH_SERVER_URI: ${AUTH_SERVER_URI}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
+      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
+    depends_on:
+      - permission-manager-db
+    networks:
+      - app-network
+
+  snippet-manager:
+    image: ghcr.io/ingsis15/snippet-manager:dev
+    ports:
+      - "${SM_PORT}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: ${SM_SPRING_URL}
+      SPRING_DATASOURCE_USERNAME: ${SM_SPRING_USER}
+      SPRING_DATASOURCE_PASSWORD: ${SM_SPRING_PASSWORD}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH_SERVER_URI: ${AUTH_SERVER_URI}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
+      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
+    depends_on:
+      - snippet-manager-db
+    networks:
+      - app-network
+
+  print-script:
+    image: ghcr.io/ingsis15/printscript-service:dev
+    ports:
+      - "${PS_PORT}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: ${PS_SPRING_URL}
+      SPRING_DATASOURCE_USERNAME: ${PS_SPRING_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PS_SPRING_PASSWORD}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH_SERVER_URI: ${AUTH_SERVER_URI}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
+      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
+    networks:
+      - app-network
+
+volumes:
+  permission_data:
+  snippet_data:
+  print_data:
+
+networks:
+  app-network:
+    driver: bridge
