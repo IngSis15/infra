@@ -1,6 +1,8 @@
 services:
   permission-manager-db:
     image: postgres
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: ${PM_DB_NAME}
       POSTGRES_USER: ${PM_DB_USER}
@@ -12,6 +14,8 @@ services:
 
   snippet-manager-db:
     image: postgres
+    ports:
+      - "5431:5432"
     environment:
       POSTGRES_DB: ${SM_DB_NAME}
       POSTGRES_USER: ${SM_DB_USER}
@@ -21,14 +25,61 @@ services:
     networks:
       - app-network
 
+  asset-service:
+    image: ghcr.io/austral-ingsis/snippet-asset-service:latest
+    ports:
+      - "${ASSET_PORT}:8080"
+    environment:
+      AZURE_HOST: "http://azurite"
+      NEW_RELIC_APP_NAME: "asset-service"
+      NEW_RELIC_AGENT_ENABLED: false
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: "azurite"
+    hostname: azurite
+    restart: always
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - blob:/workspace
+
+  snippet-manager:
+    image: ghcr.io/ingsis15/snippet-manager:latest
+    ports:
+      - "${SM_PORT}:8080"
+    environment:
+      SERVER_PORT: 8080
+      DB_PORT: 5432
+      DB_HOST: snippet-manager-db
+      DB_USERNAME: ${SM_DB_USER}
+      DB_PASSWORD: ${SM_DB_PASSWORD}
+      DB_NAME: ${SM_DB_NAME}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
+      AUTH_SERVER_URI: ${AUTH_SERVER_URI}
+      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
+      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
+      PRINTSCRIPT_HOST: http://printscript-service:${PS_PORT}
+      ASSET_HOST: http://asset-service:${ASSET_PORT}
+    depends_on:
+      - snippet-manager-db
+      - asset-service
+    networks:
+      - app-network
+
   permission-manager:
     image: ghcr.io/ingsis15/permission-manager:latest
     ports:
       - "${PM_PORT}:8080"
     environment:
-      SPRING_DATASOURCE_URL: ${PM_SPRING_URL}
-      SPRING_DATASOURCE_USERNAME: ${PM_SPRING_USER}
-      SPRING_DATASOURCE_PASSWORD: ${PM_SPRING_PASSWORD}
+      SERVER_PORT: 8080
+      DB_PORT: 5432
+      DB_HOST: permission-manager-db
+      DB_USERNAME: ${PM_DB_USER}
+      DB_PASSWORD: ${PM_DB_PASSWORD}
+      DB_NAME: ${PM_DB_NAME}
       AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
       AUTH_SERVER_URI: ${AUTH_SERVER_URI}
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
@@ -38,35 +89,17 @@ services:
     networks:
       - app-network
 
-  snippet-manager:
-    image: ghcr.io/ingsis15/snippet-manager:latest
-    ports:
-      - "${SM_PORT}:8080"
-    environment:
-      SPRING_DATASOURCE_URL: ${SM_SPRING_URL}
-      SPRING_DATASOURCE_USERNAME: ${SM_SPRING_USER}
-      SPRING_DATASOURCE_PASSWORD: ${SM_SPRING_PASSWORD}
-      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
-      AUTH_SERVER_URI: ${AUTH_SERVER_URI}
-      AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
-      AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
-    depends_on:
-      - snippet-manager-db
-    networks:
-      - app-network
-
-  print-script:
+  printscript-service:
     image: ghcr.io/ingsis15/printscript-service:latest
     ports:
       - "${PS_PORT}:8080"
     environment:
-      SPRING_DATASOURCE_URL: ${PS_SPRING_URL}
-      SPRING_DATASOURCE_USERNAME: ${PS_SPRING_USER}
-      SPRING_DATASOURCE_PASSWORD: ${PS_SPRING_PASSWORD}
+      SERVER_PORT: 8080
       AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
       AUTH_SERVER_URI: ${AUTH_SERVER_URI}
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
+      SNIPPETMANAGER_HOST: http://snippet-manager:${SM_PORT}
     networks:
       - app-network
 
@@ -74,6 +107,8 @@ volumes:
   permission_data:
   snippet_data:
   print_data:
+  blob:
+    external: false
 
 networks:
   app-network:
