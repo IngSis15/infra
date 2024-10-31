@@ -71,8 +71,8 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i vm_key.pem $VM_USERNAME@$VM_IP << 'EOF'
             cd infra
-            docker compose -f $COMPOSE_FILE pull
-            docker compose -f $COMPOSE_FILE up -d --build
+            docker-compose -f $COMPOSE_FILE pull
+            docker-compose -f $COMPOSE_FILE up -d --build
           EOF
 
       - name: Cleanup PEM Key
