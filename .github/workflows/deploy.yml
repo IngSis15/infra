@@ -50,10 +50,6 @@ jobs:
           azcliversion: latest
           inlineScript: |
             vm_status=$(az vm get-instance-view --resource-group ${{ secrets.vm_resource_group }} --name ${{ secrets.vm_name }} --query "instanceView.statuses[1].code" -o tsv)
-az ad sp create-for-rbac `
-         --name "myApp" --role contributor `
-         --scopes /subscriptions/8baa642d-5109-4f1c-b935-401e5b215078/resourceGroups/rg-ai-recommender `
-         --sdk-auth
             echo "VM status: $vm_status"
             echo "status=$vm_status" >> $GITHUB_ENV
 
