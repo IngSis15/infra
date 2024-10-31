@@ -1,0 +1,94 @@
+name: Deploy Service
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+    secrets:
+      vm_resource_group:
+        required: true
+      vm_name:
+        required: true
+      vm_username:
+        required: true
+      vm_ip:
+        required: true
+      ssh_key:
+        required: true
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      AZURE_CLIENT_SECRET:
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Check VM Status
+        id: vm_status
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            vm_status=$(az vm get-instance-view --resource-group ${{ secrets.vm_resource_group }} --name ${{ secrets.vm_name }} --query "instanceView.statuses[1].code" -o tsv)
+az ad sp create-for-rbac `
+         --name "myApp" --role contributor `
+         --scopes /subscriptions/8baa642d-5109-4f1c-b935-401e5b215078/resourceGroups/rg-ai-recommender `
+         --sdk-auth
+            echo "VM status: $vm_status"
+            echo "status=$vm_status" >> $GITHUB_ENV
+
+      - name: Start VM if Stopped
+        if: env.status != 'PowerState/running'
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            echo "Starting VM..."
+            az vm start --resource-group ${{ secrets.vm_resource_group }} --name ${{ secrets.vm_name }}
+
+      - name: Add PEM Key to SSH Agent
+        env:
+          PEM_KEY: ${{ secrets.ssh_key }}
+        run: |
+          echo "$PEM_KEY" > vm_key.pem
+          chmod 600 vm_key.pem
+          eval "$(ssh-agent -s)"
+          ssh-add vm_key.pem
+
+      - name: Deploy Application
+        env:
+          VM_USERNAME: ${{ secrets.vm_username }}
+          VM_IP: ${{ secrets.vm_ip }}
+          COMPOSE_FILE: ${{ inputs.environment == 'dev' && 'docker-compose.dev.yml' || 'docker-compose.prod.yml' }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i vm_key.pem $VM_USERNAME@$VM_IP << 'EOF'
+            cd infra
+            docker compose -f $COMPOSE_FILE pull
+            docker compose -f $COMPOSE_FILE up -d --build
+          EOF
+
+      - name: Cleanup PEM Key
+        if: success() || failure()
+        run: |
+          ssh-agent -k
+          rm -f vm_key.pem
