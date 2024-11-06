@@ -115,15 +115,15 @@ services:
       - "443:433"
     volumes:
       - ./conf.d:/etc/nginx/conf.d:ro
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./data/letsencrypt:/etc/letsencrypt
+      - ./data/www:/var/www/html
     networks:
       - app-network
 
   certbot:
     image: certbot/certbot:latest
     volumes:
-      - ./certbot/www/:/var/www/certbot/:rw
+      - ./data/www:/var/www/html
       - ./certbot/conf/:/etc/letsencrypt/:rw
 
 volumes:
