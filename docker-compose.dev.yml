@@ -105,12 +105,18 @@ services:
   proxy:
     container_name: "reverse-proxy"
     image: nginx
+    depends_on:
+      - snippet-manager
+      - printscript-service
+      - permission-manager
+      - printscript-ui
     ports:
       - "80:80"
       - "443:433"
     volumes:
       - ./conf.d:/etc/nginx/conf.d:ro
-      - ./certbot/www/:/var/www/certbot/:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./data/letsencrypt:/etc/letsencrypt
     networks:
       - app-network
 
