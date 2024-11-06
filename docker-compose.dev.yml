@@ -48,8 +48,6 @@ services:
 
   snippet-manager:
     image: ghcr.io/ingsis15/snippet-manager:dev
-    ports:
-      - "${SM_PORT}:8080"
     environment:
       SERVER_PORT: 8080
       DB_PORT: 5432
@@ -71,8 +69,6 @@ services:
 
   permission-manager:
     image: ghcr.io/ingsis15/permission-manager:dev
-    ports:
-      - "${PM_PORT}:8080"
     environment:
       SERVER_PORT: 8080
       DB_PORT: 5432
@@ -91,8 +87,6 @@ services:
 
   printscript-service:
     image: ghcr.io/ingsis15/printscript-service:dev
-    ports:
-      - "${PS_PORT}:8080"
     environment:
       SERVER_PORT: 8080
       AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
@@ -100,6 +94,21 @@ services:
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
       SNIPPETMANAGER_HOST: http://snippet-manager:${SM_PORT}
+    networks:
+      - app-network
+
+  printscript-ui:
+    image: ghcr.io/ingsis15/printscript-ui:latest
+    networks:
+      - app-network
+
+  proxy:
+    container_name: "reverse-proxy"
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d:ro
     networks:
       - app-network
 
