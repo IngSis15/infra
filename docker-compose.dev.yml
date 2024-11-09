@@ -27,8 +27,6 @@ services:
 
   asset-service:
     image: ghcr.io/austral-ingsis/snippet-asset-service:latest
-    ports:
-      - "${ASSET_PORT}:8080"
     environment:
       AZURE_HOST: "http://azurite"
       NEW_RELIC_APP_NAME: "asset-service"
@@ -59,8 +57,8 @@ services:
       AUTH_SERVER_URI: ${AUTH_SERVER_URI}
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
-      PRINTSCRIPT_HOST: http://printscript-service:${PS_PORT}
-      ASSET_HOST: http://asset-service:${ASSET_PORT}
+      PRINTSCRIPT_HOST: http://printscript-service:8080
+      ASSET_HOST: http://asset-service:8080
     depends_on:
       - snippet-manager-db
       - asset-service
@@ -93,7 +91,7 @@ services:
       AUTH_SERVER_URI: ${AUTH_SERVER_URI}
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
-      SNIPPETMANAGER_HOST: http://snippet-manager:${SM_PORT}
+      SNIPPETMANAGER_HOST: http://snippet-manager:8080
     networks:
       - app-network
 
