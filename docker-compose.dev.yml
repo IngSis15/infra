@@ -45,6 +45,8 @@ services:
       - "10002:10002"
     volumes:
       - blob:/workspace
+    networks:
+      - app-network
 
   snippet-manager:
     image: ghcr.io/ingsis15/snippet-manager:dev
