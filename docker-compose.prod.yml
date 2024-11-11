@@ -31,6 +31,8 @@ services:
       AZURE_HOST: "http://azurite"
       NEW_RELIC_APP_NAME: "asset-service"
       NEW_RELIC_AGENT_ENABLED: false
+    networks:
+      - app-network
 
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
