@@ -63,6 +63,7 @@ services:
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
       PRINTSCRIPT_HOST: http://printscript-service:8080
       ASSET_HOST: http://asset-service:8080
+      PERMISSION_HOST: http://permission-manager:8080
       NEW_RELIC_LICENSE_KEY: ${SM_NEWRELIC_KEY}
       NEW_RELIC_APP_NAME: ${SM_NEWRELIC_NAME}
     depends_on:
