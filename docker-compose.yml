@@ -49,7 +49,7 @@ services:
       - app-network
 
   snippet-manager:
-    image: ghcr.io/ingsis15/snippet-manager:dev
+    image: ghcr.io/ingsis15/snippet-manager:${TAG}
     environment:
       SERVER_PORT: 8080
       DB_PORT: 5432
@@ -64,7 +64,7 @@ services:
       PRINTSCRIPT_HOST: http://printscript-service:8080
       ASSET_HOST: http://asset-service:8080
       PERMISSION_HOST: http://permission-manager:8080
-      NEW_RELIC_LICENSE_KEY: ${SM_NEWRELIC_KEY}
+      NEW_RELIC_LICENSE_KEY: ${NEWRELIC_KEY}
       NEW_RELIC_APP_NAME: ${SM_NEWRELIC_NAME}
     depends_on:
       - snippet-manager-db
@@ -73,7 +73,7 @@ services:
       - app-network
 
   permission-manager:
-    image: ghcr.io/ingsis15/permission-manager:dev
+    image: ghcr.io/ingsis15/permission-manager:${TAG}
     environment:
       SERVER_PORT: 8080
       DB_PORT: 5432
@@ -85,15 +85,16 @@ services:
       AUTH_SERVER_URI: ${AUTH_SERVER_URI}
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
-      NEW_RELIC_LICENSE_KEY: ${PM_NEWRELIC_KEY}
+      NEW_RELIC_LICENSE_KEY: ${NEWRELIC_KEY}
       NEW_RELIC_APP_NAME: ${PM_NEWRELIC_NAME}
+
     depends_on:
       - permission-manager-db
     networks:
       - app-network
 
   printscript-service:
-    image: ghcr.io/ingsis15/printscript-service:dev
+    image: ghcr.io/ingsis15/printscript-service:${TAG}
     environment:
       SERVER_PORT: 8080
       AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
@@ -101,7 +102,7 @@ services:
       AUTH_CLIENT_ID: ${AUTH_CLIENT_ID}
       AUTH_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
       SNIPPETMANAGER_HOST: http://snippet-manager:8080
-      NEW_RELIC_LICENSE_KEY: ${PS_NEWRELIC_KEY}
+      NEW_RELIC_LICENSE_KEY: ${NEWRELIC_KEY}
       NEW_RELIC_APP_NAME: ${PS_NEWRELIC_NAME}
     networks:
       - app-network
@@ -123,7 +124,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./conf.d/:/etc/nginx/conf.d/:ro
+      - ./conf.d/${TAG}-server.conf:/etc/nginx/conf.d/.ro
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     networks:
