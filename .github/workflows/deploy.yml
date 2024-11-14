@@ -70,10 +70,10 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i vm_key.pem $VM_USERNAME@$VM_IP << 'EOF'
             cd infra
-            COMPOSE_FILE=${{ inputs.environment == 'dev' && 'docker-compose.dev.yml' || 'docker-compose.prod.yml' }}
-            echo "Using compose file: $COMPOSE_FILE"
-            docker compose -f $COMPOSE_FILE pull
-            docker compose -f $COMPOSE_FILE up -d --build
+            TAG=${{ inputs.environment == 'dev' && 'dev' || 'latest' }}
+            TAG=$TAG docker compose down
+            TAG=$TAG docker compose pull
+            TAG=$TAG docker compose up -d --build
           EOF
 
       - name: Cleanup PEM Key
