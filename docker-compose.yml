@@ -120,7 +120,7 @@ services:
       - app-network
 
   printscript-ui:
-    image: ghcr.io/ingsis15/printscript-ui:latest
+    image: ghcr.io/ingsis15/printscript-ui:${TAG}
     networks:
       - app-network
 
@@ -136,7 +136,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./conf.d/${TAG}-server.conf:/etc/nginx/conf.d/deafult.conf:ro
+      - ./conf.d/${TAG}-server.conf:/etc/nginx/conf.d/server.conf:ro
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     networks:
