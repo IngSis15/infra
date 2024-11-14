@@ -25,6 +25,14 @@ services:
     networks:
       - app-network
 
+  redis:
+    container_name: "event-bus"
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
   asset-service:
     image: ghcr.io/austral-ingsis/snippet-asset-service:latest
     environment:
@@ -110,14 +118,6 @@ services:
       NEW_RELIC_APP_NAME: ${PS_NEWRELIC_NAME}
       ASSET_HOST: http://asset-service:8080
       REDIS_HOST: redis
-    networks:
-      - app-network
-
-  redis:
-    container_name: "event-bus"
-    image: redis:6-alpine
-    ports:
-      - "6379:6379"
     networks:
       - app-network
 
