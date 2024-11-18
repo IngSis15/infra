@@ -117,6 +117,7 @@ services:
       NEW_RELIC_LICENSE_KEY: ${NEWRELIC_KEY}
       NEW_RELIC_APP_NAME: ${PS_NEWRELIC_NAME}
       ASSET_HOST: http://asset-service:8080
+      SNIPPET_HOST: http://snippet-manager:8080
       REDIS_HOST: redis
     networks:
       - app-network
