@@ -1,0 +1,30 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  deploy_dev:
+    name: Deploy to dev VM
+    if: github.ref == 'refs/heads/dev'
+    uses: IngSis15/infra/.github/workflows/deploy.yml@main
+    with:
+      environment: "dev"
+    secrets:
+      ssh_key: ${{ secrets.DEV_SSH_KEY }}
+      vm_username: ${{ secrets.DEV_VM_USERNAME }}
+      vm_ip: ${{ secrets.DEV_VM_IP }}
+
+  deploy_prod:
+    name: Deploy to prod VM
+    if: github.ref == 'refs/heads/main'
+    uses: IngSis15/infra/.github/workflows/deploy.yml@main
+    with:
+      environment: "prod"
+    secrets:
+      ssh_key: ${{ secrets.SSH_KEY }}
+      vm_username: ${{ secrets.VM_USERNAME }}
+      vm_ip: ${{ secrets.VM_IP }}
