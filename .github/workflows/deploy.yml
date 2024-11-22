@@ -49,15 +49,15 @@ jobs:
 
             if [ -n "$SERVICE_NAME" ]; then
               echo "Deploying single service: $SERVICE_NAME"
-              docker compose stop $SERVICE_NAME
-              docker compose pull $SERVICE_NAME
-              docker compose up -d --no-deps --build $SERVICE_NAME
+              TAG=$TAG docker compose stop $SERVICE_NAME
+              TAG=$TAG docker compose pull $SERVICE_NAME
+              TAG=$TAG docker compose up -d --no-deps --build $SERVICE_NAME
             else
               echo "Deploying full stack"
               git pull
-              docker compose down
-              docker compose pull
-              docker compose up -d --build
+              TAG=$TAG docker compose down
+              TAG=$TAG docker compose pull
+              TAG=$TAG docker compose up -d --build
             fi
           EOF
 
