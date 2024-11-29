@@ -75,6 +75,7 @@ services:
       NEW_RELIC_LICENSE_KEY: ${NEWRELIC_KEY}
       NEW_RELIC_APP_NAME: ${SM_NEWRELIC_NAME}
       REDIS_HOST: redis
+      NEW_RELIC_LOG_EXTENSION_ADD_MDC: true
     depends_on:
       - snippet-manager-db
       - asset-service
@@ -99,6 +100,7 @@ services:
       AUTH_CLIENT_SECRET_API: ${AUTH_CLIENT_SECRET_API}
       NEW_RELIC_LICENSE_KEY: ${NEWRELIC_KEY}
       NEW_RELIC_APP_NAME: ${PM_NEWRELIC_NAME}
+      NEW_RELIC_LOG_EXTENSION_ADD_MDC: true
 
     depends_on:
       - permission-manager-db
@@ -119,6 +121,7 @@ services:
       ASSET_HOST: http://asset-service:8080
       SNIPPET_HOST: http://snippet-manager:8080
       REDIS_HOST: redis
+      NEW_RELIC_LOG_EXTENSION_ADD_MDC: true
     networks:
       - app-network
 
