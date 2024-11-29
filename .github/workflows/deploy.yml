@@ -41,17 +41,16 @@ jobs:
         env:
           VM_USERNAME: ${{ secrets.vm_username }}
           VM_IP: ${{ secrets.vm_ip }}
-          SERVICE_NAME: ${{ inputs.service_name }}
         run: |
           ssh -o StrictHostKeyChecking=no -i vm_key.pem $VM_USERNAME@$VM_IP << 'EOF'
             cd infra
             TAG=${{ inputs.environment == 'dev' && 'dev' || 'latest' }}
 
-            if [ -n "$SERVICE_NAME" ]; then
-              echo "Deploying single service: $SERVICE_NAME"
-              TAG=$TAG docker compose stop $SERVICE_NAME
-              TAG=$TAG docker compose pull $SERVICE_NAME
-              TAG=$TAG docker compose up -d --no-deps --build $SERVICE_NAME
+            if [ -n "${{ inputs.service_name }}" ]; then
+              echo "Deploying single service: ${{ inputs.service_name }}"
+              TAG=$TAG docker compose stop ${{ inputs.service_name }}
+              TAG=$TAG docker compose pull ${{ inputs.service_name }}
+              TAG=$TAG docker compose up -d --no-deps --build ${{ inputs.service_name }}
             else
               echo "Deploying full stack"
               git pull
