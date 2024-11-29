@@ -156,6 +156,7 @@ volumes:
   snippet_data:
   print_data:
   blob:
+    external: true
 
 networks:
   app-network:
